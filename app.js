@@ -163,7 +163,7 @@ const overlay = document.getElementById("overlay");
 const menuBtn = document.getElementById("historyToggle");
 
 // 🔐 API Key
-const API_KEY = "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"; // Replace with your real key
+const API_KEY = "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"; // Replace with your real key
 const STORAGE_NAME = "chatHistoryList";
 
 let allChats = {};
