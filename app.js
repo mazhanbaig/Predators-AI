@@ -9,7 +9,7 @@ const overlay = document.getElementById("overlay");
 const menuBtn = document.getElementById("historyToggle");
 
 // 🗝️ API Key (keep it safe)
-const API_KEY = "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";
+let API_KEY = "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";
 const STORAGE_NAME = "chatHistoryList";
 
 let allChats = {};
