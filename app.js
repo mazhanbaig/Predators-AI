@@ -149,10 +149,6 @@
 // }
 // loadSavedChats();
 
-
-
-
-// 📌 Get elements from the page
 const micBtn = document.getElementById("micBtn");
 const sendBtn = document.getElementById("sendBtn");
 const inputBox = document.getElementById("searchInput");
@@ -162,20 +158,19 @@ const drawer = document.getElementById("historyDrawer");
 const overlay = document.getElementById("overlay");
 const menuBtn = document.getElementById("historyToggle");
 
-// 🔐 API Key
-const API_KEY = "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"; // Replace with your real key
+const API_KEY = "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"; // ✅ Replace with your FREE OpenRouter key
 const STORAGE_NAME = "chatHistoryList";
 
 let allChats = {};
 let currentChatId = null;
 
-// 🎤 Voice input
+// Voice recognition
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (SpeechRecognition) {
   const recognition = new SpeechRecognition();
   recognition.lang = "en-US";
   micBtn.addEventListener("click", () => recognition.start());
-  recognition.onresult = event => {
+  recognition.onresult = (event) => {
     inputBox.value = event.results[0][0].transcript;
   };
 } else {
@@ -183,13 +178,12 @@ if (SpeechRecognition) {
   alert("Voice input not supported.");
 }
 
-// 💬 Display message (with Markdown support)
 function addMessage(text, sender, returnDiv = false) {
   const row = document.createElement("div");
   row.className = `flex ${sender === "user" ? "justify-end" : "justify-start"}`;
 
   const bubble = document.createElement("div");
-  bubble.innerHTML = marked.parse(text); // ✅ Render Markdown to HTML
+  bubble.innerHTML = marked.parse(text);
   bubble.className = `
     block w-fit max-w-[90%] px-4 py-2 rounded-xl break-words 
     ${sender === "user" ? "bg-white text-black" : "bg-gray-900 text-white"}
@@ -201,7 +195,6 @@ function addMessage(text, sender, returnDiv = false) {
   return returnDiv ? bubble : null;
 }
 
-// 💾 Save message to localStorage
 function saveMessage(sender, message) {
   if (!currentChatId) {
     currentChatId = `chat_${Date.now()}`;
@@ -211,34 +204,32 @@ function saveMessage(sender, message) {
   localStorage.setItem(STORAGE_NAME, JSON.stringify(allChats));
 }
 
-// 🤖 Talk to AI (using DeepSeek or any other working model)
 async function talkToAI(userText) {
   try {
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${API_KEY}`
+        Authorization: `Bearer ${API_KEY}`,
       },
       body: JSON.stringify({
-        model: "deepseek/deepseek-chat-v3-0324:free", // ✅ Works well and free
+        model: "deepseek/deepseek-chat",
         messages: [
-          { role: "system", content: "You are a helpful assistant." },
-          { role: "user", content: userText }
+          { role: "system", content: "Be helpful, friendly, and clear." },
+          { role: "user", content: userText },
         ],
-        max_tokens: 500
-      })
+        max_tokens: 500,
+      }),
     });
 
     const data = await res.json();
-    if (!res.ok) return `❌ Error: ${data.error?.message || "Unknown problem"}`;
-    return data.choices?.[0]?.message?.content?.trim() || "❌ No response from AI";
+    if (!res.ok) return `❌ Error: ${data.error?.message || "Unknown error"}`;
+    return data.choices?.[0]?.message?.content?.trim() || "❌ No response";
   } catch (err) {
-    return "⚠️ Network error or timeout.";
+    return "⚠️ Network error or server timeout.";
   }
 }
 
-// ✅ Handle send button
 sendBtn.addEventListener("click", async () => {
   const userText = inputBox.value.trim();
   if (!userText) return;
@@ -247,12 +238,11 @@ sendBtn.addEventListener("click", async () => {
   saveMessage("user", userText);
   const loading = addMessage("🤖 Typing...", "bot", true);
   const reply = await talkToAI(userText);
-  loading.innerHTML = marked.parse(reply); // ✅ Markdown for bot reply
+  loading.innerHTML = marked.parse(reply);
   saveMessage("assistant", reply);
   updateHistorySidebar();
 });
 
-// 📁 Update sidebar history
 function updateHistorySidebar() {
   historyBox.innerHTML = "";
   for (const chatId in allChats) {
@@ -268,13 +258,11 @@ function updateHistorySidebar() {
   }
 }
 
-// 🖼 Show selected chat
 function showChat(chatId) {
   messageArea.innerHTML = "";
   allChats[chatId].forEach(msg => addMessage(msg.content, msg.role));
 }
 
-// 📱 Sidebar toggle
 menuBtn.addEventListener("click", () => {
   drawer.classList.toggle("-translate-x-full");
   overlay.classList.toggle("hidden");
@@ -284,7 +272,6 @@ overlay.addEventListener("click", () => {
   overlay.classList.add("hidden");
 });
 
-// 🚀 Load saved chats
 function loadSavedChats() {
   const saved = localStorage.getItem(STORAGE_NAME);
   if (saved) {
